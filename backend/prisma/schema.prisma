@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Mendefinisikan generator untuk Prisma Client
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Mendefinisikan koneksi ke database PostgreSQL
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Model untuk Pengguna
+// Bertanggung jawab untuk menyimpan data autentikasi dan profil
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  // Menyimpan refresh token yang sudah di-hash untuk keamanan
+  hashedRefreshToken String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relasi many-to-many dengan model Role
+  roles Role[]
+  // Relasi one-to-many dengan model Post (seorang User bisa punya banyak Post)
+  posts Post[]
+}
+
+// Model untuk Peran (Role)
+// Digunakan untuk sistem RBAC (Role-Based Access Control)
+model Role {
+  id        String   @id @default(cuid())
+  // Nama peran yang unik, contoh: "ADMIN", "USER"
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  // Relasi many-to-many dengan model User
+  users User[]
+}
+
+// Model untuk Postingan
+// Resource utama yang kita gunakan untuk menerapkan aturan ABAC
+model Post {
+  id        String   @id @default(cuid())
+  title     String
+  content   String?
+  published Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relasi many-to-one dengan model User (sebuah Post hanya dimiliki satu User)
+  author    User     @relation(fields: [authorId], references: [id])
+  // Foreign key yang menghubungkan ke tabel User
+  authorId  String
+}
+

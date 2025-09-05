@@ -1,0 +1,8 @@
+# File ini adalah file konfigurasi utama
+root = true
+
+[*] # Berlaku untuk semua file
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+charset = utf-8
